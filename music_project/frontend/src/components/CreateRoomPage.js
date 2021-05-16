@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, { useState } from "react";
 import Button from "@material-ui/core/Button";
 import Grid from "@material-ui/core/Grid";
 import Typography from "@material-ui/core/Typography";
@@ -12,7 +12,7 @@ import FormControlLabel from "@material-ui/core/FormControlLabel";
 import { Collapse } from "@material-ui/core";
 import Alert from "@material-ui/lab/Alert";
 
-
+/*
 
 export default class CreateRoomPage extends Component {
   static defaultProps = { // if no values are passed to these variables, they will have these default values
@@ -202,7 +202,8 @@ handleGuestCanPauseChange(e) {
             </Grid>
     );
     
-    
+    */ 
+
     //Grid is a standard thing used in material UI to align items vertically or horizontally, 
     //by default when we define grid like this it is a container and it will hold and align things vertically in a column structure
     // The spacing is how much space we should put between the items in the grid, 1 means eight pixels    
@@ -219,5 +220,185 @@ handleGuestCanPauseChange(e) {
     //use react state to keep track of what is in our form
     //if we are updating then return this.renderUpdateButtons, otherwise return this.renderCreateButtons
     // "in" is a boolean value that tells whether something should be shown or not, if the condition we put in the sqiuggly brackets is true, show whatever is inside the collapse tag, otherwise don't show it
+//  }
+//}
+
+
+
+function CreateRoomPage() {
+   //setting the default values for the following variables
+  const [votesToSkip, setvotesToSkip] = useState(2);
+  const [guestCanPause, setguestCanPause] = useState(true);
+  const [update, setupdate] = useState(false);
+  const [roomCode, setroomCode] = useState(null);
+  const [errorMsg, seterrorMsg] = useState("");
+  const [successMsg, setsuccessMsg] = useState("");
+
+  //this will update the number of votes required to skip a song
+  const handleVotesChange = e => {
+    setvotesToSkip(e.target.value);
   }
+
+  const handleGuestCanPauseChange = e => {
+    setguestCanPause(e.target.value === 'true' ? true : false,) //if this value is equal to the string "true", then make what is here true, otherwise make it false)
+  }
+
+  function handleRoomButtonPressed() {
+    const requestOptions = {
+      method: "POST",
+      headers: { "Content-Type": "application/json" }, //HTTP headers let the client and the server pass additional information with an HTTP request or response. Content-Type is an HTTP header which is used to indicate the media type of the resource and in case of responses it tells the browser about what actually content type of the returned content is. In case of any POST or PUT requests, the client tells the server about the kind of data sent. The header is there so your app can detect what data was returned and how it should handle it. The content header is just information about the type of returned data, ex::JSON,image(png,jpg,etc..),html
+      body: JSON.stringify({ //The JSON.stringify() method converts a JavaScript object or value to a JSON string, 
+        votes_to_skip: votesToSkip,
+        guest_can_pause: guestCanPause,
+      }),
+    };
+    fetch("/api/create-room", requestOptions) //fetch api fetches resources
+      .then((response) => response.json())  //Here we are fetching a JSON file across the network and printing it to the console. The simplest use of fetch() takes one argument — the path to the resource you want to fetch — and returns a promise containing the response (a Response object). This is just an HTTP response, not the actual JSON. To extract the JSON body content from the response, we use the json() method (defined on the Body mixin, which is implemented by both the Request and Response objects.)
+      .then((data) => props.history.push('/room/' + data.code));
+    }
+  
+
+  function handleUpdateButtonPressed() {
+    const requestOptions = {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        votes_to_skip: this.state.votesToSkip,
+        guest_can_pause: this.state.guestCanPause,
+        code: props.roomCode,
+      }),
+    };
+    fetch("/api/update-room", requestOptions).then((response) => {
+      if (response.ok) {        
+        setsuccessMsg("Room updated successfully!");       
+      } else {  
+          seterrorMsg("Error updating room...");    
+      }
+      props.updateCallback();
+    });
+  }
+
+  function renderCreateButtons() {
+    return (
+      <Grid container spacing = {1}>
+        <Grid item xs = {12} align="center">
+          <Button color="primary" variant = "contained" onClick={handleRoomButtonPressed} >
+          Create A Room
+          </Button>
+        </Grid>
+        <Grid item xs = {12} align="center">
+          <Button color="secondary" variant = "contained" to="/"  component={Link}>
+            Back 
+          </Button>
+        </Grid>
+      </Grid>
+        );
+  }
+
+  function renderUpdateButtons () {
+    return (
+      <Grid item xs = {12} align="center">
+        <Button color="primary" 
+        variant = "contained" 
+        onClick={handleUpdateButtonPressed} 
+        >
+          Update Room
+        </Button>
+      </Grid>
+    );
+  }
+
+  const title = this.props.update ? "Update Room" : "Create a Room"; //if this.props.update is true, {title} will be "update room", otherwise its "create a room"
+
+  return (
+    <Grid container spacing={1}> 
+      <Grid item xs = {12} align="center">
+         <Collapse 
+         in={errorMsg != "" || "" || successMsg != ""}
+         > 
+          {successMsg != "" ? 
+          (<Alert severity = "success" 
+          onClose={() => 
+            {(setsuccessMsg(""));
+        }} >
+          {successMsg}
+          </Alert>) 
+          : (<Alert severity = "error" onClose={() => 
+            {(seterrorMsg(""));
+        }}>
+            {errorMsg}
+            </Alert>)}
+         </Collapse>
+      </Grid>
+      <Grid item xs = {12} align="center">
+          <Typography component='h4' variant="h4">
+          {title}
+          </Typography>
+      </Grid>
+      <Grid item xs = {12} align="center">
+        <FormControl component="fieldset">
+           <FormHelperText>
+             <div align='center'> Guest Control of Playback State </div>                    
+                </FormHelperText>
+                <RadioGroup 
+                row 
+                defaultValue='true' 
+                onChange={handleGuestCanPauseChange}
+                >
+                    <FormControlLabel
+                    value= {props.guestCanPause.toString()}
+                    control = {<Radio color="primary" /> }
+                    label = "Play/Pause"
+                    labelPlacement = "bottom"
+                  />
+                
+                    <FormControlLabel 
+                    value="false" 
+                    control = {<Radio color="secondary" /> }
+                    label = "No Control"
+                    labelPlacement = "bottom"
+                  />
+            </RadioGroup>
+        </FormControl>
+      </Grid>
+        <Grid item xs = {12} align="center">
+          <FormControl>
+            <TextField 
+            required = {true} 
+            type = "number" 
+            onChange={handleVotesChange}
+            defaultValue = {votesToSkip}
+            inputProps = {{
+            min: 1,
+            style: { textAlign: "center"}
+            }}
+                  />
+            <FormHelperText>
+              <div align="center">
+                Votes Required to Skip Song
+              </div>
+            </FormHelperText>
+          </FormControl>
+        </Grid> 
+        {props.update 
+        ? renderUpdateButtons() 
+        : renderCreateButtons()}  
+    </Grid>
+);
 }
+
+CreateRoomPage()
+
+   
+
+
+
+
+
+
+
+
+
+
+
+
