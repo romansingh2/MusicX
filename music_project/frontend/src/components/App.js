@@ -2,29 +2,11 @@ import React, {useState} from "react";
 import { render } from "react-dom"; 
 import HomePage from './HomePage';
 
-/*
-export default class App extends Component {
-    constructor(props) {
-        super(props);
-        
-    }
-    render() {
-        return(
-        <div className = "center">  
-        <HomePage/>
-        
-        </div>
-        );
-    }
-}
-
-
-*/
 
  // a prop is a property or arguement we give to a component, and use that to modify behaviour of component
  // whenever we want to write javascript code in a render function we need scquiggly brackets '{}' 
 
- function App() {
+function App() {
     return(
         <div className = "center">  
         <HomePage/>
