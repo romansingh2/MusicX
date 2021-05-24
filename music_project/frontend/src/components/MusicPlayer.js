@@ -96,6 +96,7 @@ const skipSong = () => {
   };
 
 const pauseSong = () => {
+  console.log("stop the damn song!")
     const requestOptions = {
         method: 'PUT',
         headers: {'Content-Type': 'application/json'}
@@ -104,6 +105,7 @@ const pauseSong = () => {
 };
 
 const playSong = () => {
+  console.log("play the damn song!")
     const requestOptions = {
         method: 'PUT',
         headers: {'Content-Type': 'application/json'}
@@ -113,7 +115,7 @@ const playSong = () => {
 
 
 
-const songProgress = (props.time / props.duration) * 100;
+const songProgress = ((props.time / props.duration) * 100);
 
     return (
       <Card>
@@ -132,7 +134,7 @@ const songProgress = (props.time / props.duration) * 100;
               <IconButton
                 onClick={() => {
                   props.is_playing ? pauseSong() : playSong();
-                }}
+                }}       
               >
                 {props.is_playing ? <PauseIcon /> : <PlayArrowIcon />}
               </IconButton>

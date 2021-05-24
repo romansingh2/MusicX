@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Component } from "react";
 import { Grid, Button, Typography } from "@material-ui/core";
 import CreateRoomPage from "./CreateRoomPage";
 import MusicPlayer from "./MusicPlayer";
 import { useHistory } from 'react-router-dom';
 import {HomePage} from './HomePage'
+
 
 /*
 export default class Room extends Component {
@@ -170,10 +171,11 @@ export default class Room extends Component {
     );
   }
 }
+
+
+
+
 */
-
-
-
 
 export default function Room(props) {
   
@@ -184,18 +186,61 @@ export default function Room(props) {
   const [spotifyAuthenticated, setSpotifyAuthenticated] = useState(false);
   const [song, setSong] = useState({});
   const [roomCode, setRoomCode] = useState(props.match.params.roomCode);
-  
-  
+  const [getCurrentSong, setgetCurrentSong] = useState(
+                                                          fetch("/spotify/current-song")
+                                                            .then((response) => {
+                                                              if (!response.ok) {
+                                                                return {};
+                                                              } else {
+                                                                return response.json();
+                                                              }
+                                                            })
+                                                            .then((data) => {
+                                                              setSong(data) 
+                                                              console.log(data);
+                                                            })
+                                                            );
+
+  const[getRoomDetails, setgetRoomDetails] = useState(  () => {
+   
+    return fetch("/api/get-room" + "?code=" + roomCode)
+      .then((response) => {
+        if (!response.ok) {
+          props.leaveRoomCallback();
+          props.history.push("/");
+        }
+        return response.json();
+      })
+      .then((data) => { 
+          setVotesToSkip(data.votes_to_skip),
+          setGuestCanPause(data.guest_can_pause),
+          setIsHost(data.is_host)    
+        if (isHost) {
+          authenticateSpotify();
+        }
+      });
+  } )
+    
+   
+                                                      
   useEffect(() => {
     const interval = setInterval(() => {
-      getCurrentSong;
+      getCurrentSong();
     }, 1000);
     return () => clearInterval(interval);
-  }, []);
-  
-  
+  }, [] );
+
+                                                        
+  useEffect(() => {
+    const interval = setInterval(() => {
+      getRoomDetails();
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [] );
+
+/*
   const getRoomDetails = () => {
-    console.log("getRoomDetails")
+   
     return fetch("/api/get-room" + "?code=" + roomCode)
       .then((response) => {
         if (!response.ok) {
@@ -213,15 +258,16 @@ export default function Room(props) {
         }
       });
   };
+*/
 
 
   const authenticateSpotify = () => {
-    console.log("authenticateSpotify")
+   
     fetch("/spotify/is-authenticated")
       .then((response) => response.json())
       .then((data) => {
         setSpotifyAuthenticated(data.status)
-        console.log(data.status);
+        
         if (!data.status) {
           fetch("/spotify/get-auth-url")
             .then((response) => response.json())
@@ -232,24 +278,9 @@ export default function Room(props) {
       });
   };
 
-  const getCurrentSong = () => {
-    console.log("getCurrentSong")
-    fetch("/spotify/current-song")
-      .then((response) => {
-        if (!response.ok) {
-          return {};
-        } else {
-          return response.json();
-        }
-      })
-      .then((data) => {
-        setSong(data) 
-        console.log(data);
-      });
-  };
 
   const leaveButtonPressed = () =>{
-    console.log("leaveButtonPressed")
+   
     const requestOptions = {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -261,12 +292,13 @@ export default function Room(props) {
   };
 
   const updateShowSettings = (value) => {
-    console.log("updateShowSettings")
+    
    setShowSettings(value)
   };
 
+
   function renderSettings() {
-    console.log("rendersettings")
+    
     return (
       <Grid container spacing={1}>
         <Grid item xs={12} align="center">
@@ -305,12 +337,10 @@ export default function Room(props) {
     );
   }
 
- console.log("isHost is " + isHost)
-  
     if (showSettings) {
       return renderSettings();
     }
-  
+    
     return (
       <Grid container spacing={1}>
         <Grid item xs={12} align="center">
@@ -319,7 +349,7 @@ export default function Room(props) {
           </Typography>
         </Grid>
         <MusicPlayer {...song} />
-        {isHost ? renderSettingsButton() : "no setting button"}
+        {isHost ? renderSettingsButton() : ""}
         <Grid item xs={12} align="center">
           <Button
             variant="contained"

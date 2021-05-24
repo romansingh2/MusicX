@@ -240,12 +240,11 @@ const handleVotesChange = (e) => { //e means object that called this function
   setVotesToSkip(e.target.value) //get the object that called this function, in this case the textfield, it will then get the value from the textfield and put it here for votesToSkip  
 };
 
-const handleGuestCanPauseChange = (e) => {
-    setGuestCanPause(e.target.value === 'true' ? true : false) //if this value is equal to the string "true", then make what is here true, otherwise make it false
-};
+const handleGuestCanPauseChange = (e) => { 
+   setGuestCanPause(e.target.value === 'true' ? true : false) //if this value is equal to the string "true", then make what is here true, otherwise make it false
+  };
 
 const handleRoomButtonPressed = () => {
-  console.log("handleroombuttonpressed")
     const requestOptions = {
       method: "POST",
       headers: { "Content-Type": "application/json" }, //HTTP headers let the client and the server pass additional information with an HTTP request or response. Content-Type is an HTTP header which is used to indicate the media type of the resource and in case of responses it tells the browser about what actually content type of the returned content is. In case of any POST or PUT requests, the client tells the server about the kind of data sent. The header is there so your app can detect what data was returned and how it should handle it. The content header is just information about the type of returned data, ex::JSON,image(png,jpg,etc..),html
@@ -257,7 +256,6 @@ const handleRoomButtonPressed = () => {
     fetch("/api/create-room", requestOptions) //fetch api fetches resources
       .then((response) => response.json())  //Here we are fetching a JSON file across the network and printing it to the console. The simplest use of fetch() takes one argument — the path to the resource you want to fetch — and returns a promise containing the response (a Response object). This is just an HTTP response, not the actual JSON. To extract the JSON body content from the response, we use the json() method (defined on the Body mixin, which is implemented by both the Request and Response objects.)
       .then((data) => props.history.push('/room/' + data.code));
-      console.log("yo")
     };
   
 const handleUpdateButtonPressed = () => {
@@ -265,9 +263,9 @@ const handleUpdateButtonPressed = () => {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          votes_to_skip: setVotesToSkip,
-          guest_can_pause: setGuestCanPause,
-          code: props.setRoomCode,
+          votes_to_skip: votesToSkip,
+          guest_can_pause: guestCanPause,
+          code: props.roomCode,
         }),
       };
       fetch("/api/update-room", requestOptions).then((response) => {
@@ -350,11 +348,11 @@ const handleUpdateButtonPressed = () => {
                         </FormHelperText>
                         <RadioGroup 
                         row 
-                        defaultValue='true' 
+                        defaultValue= {guestCanPause.toString()} 
                         onChange={handleGuestCanPauseChange}
                         >
                             <FormControlLabel
-                            value= {guestCanPause.toString()}
+                            value= "true"
                             control = {<Radio color="primary" /> }
                             label = "Play/Pause"
                             labelPlacement = "bottom"
@@ -362,7 +360,7 @@ const handleUpdateButtonPressed = () => {
                         
                             <FormControlLabel 
                             value="false" 
-                            control = {<Radio color="secondary" /> }
+                            control = {<Radio color="secondary"/> }
                             label = "No Control"
                             labelPlacement = "bottom"
                           />
