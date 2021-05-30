@@ -195,7 +195,7 @@ export default function Room(props) {
   
   
   
-  function getCurrentSong () {
+  function getCurrentSong () {                            getRoomDetails();
                                                           fetch("/spotify/current-song")
                                                             .then((response) => {
                                                               if (!response.ok) {
@@ -223,7 +223,6 @@ export default function Room(props) {
   
 
 function getRoomDetails () {
-  console.log("get room details")
     return fetch("/api/get-room" + "?code=" + roomCode)
     .then((response) => {
       if (!response.ok) {
@@ -242,10 +241,8 @@ function getRoomDetails () {
     });
   };
 
-  useEffect(() => {
-    getRoomDetails(); //parse and look through the json object to get the room code
-  }, []);
-
+ 
+ 
 
                                                         
 
