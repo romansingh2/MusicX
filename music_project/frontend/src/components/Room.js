@@ -1,4 +1,4 @@
-import React, { useState, useEffect, Component } from "react";
+import React, { useState, useEffect, Component, useMemo} from "react";
 import { Grid, Button, Typography } from "@material-ui/core";
 import CreateRoomPage from "./CreateRoomPage";
 import MusicPlayer from "./MusicPlayer";
@@ -186,7 +186,16 @@ export default function Room(props) {
   const [spotifyAuthenticated, setSpotifyAuthenticated] = useState(false);
   const [song, setSong] = useState({});
   const [roomCode, setRoomCode] = useState(props.match.params.roomCode);
-  const [getCurrentSong, setgetCurrentSong] = useState(
+  
+                                                        
+  
+
+  
+  
+  
+  
+  
+  function getCurrentSong () {
                                                           fetch("/spotify/current-song")
                                                             .then((response) => {
                                                               if (!response.ok) {
@@ -198,45 +207,68 @@ export default function Room(props) {
                                                             .then((data) => {
                                                               setSong(data) 
                                                               console.log(data);
-                                                            })
-                                                            );
+                                                           });
+                                                           
+  }  
 
-  const[getRoomDetails, setgetRoomDetails] = useState(  () => {
-   
-    return fetch("/api/get-room" + "?code=" + roomCode)
-      .then((response) => {
-        if (!response.ok) {
-          props.leaveRoomCallback();
-          props.history.push("/");
-        }
-        return response.json();
-      })
-      .then((data) => { 
-          setVotesToSkip(data.votes_to_skip),
-          setGuestCanPause(data.guest_can_pause),
-          setIsHost(data.is_host)    
-        if (isHost) {
-          authenticateSpotify();
-        }
-      });
-  } )
-    
-   
-                                                      
+
   useEffect(() => {
     const interval = setInterval(() => {
       getCurrentSong();
     }, 1000);
     return () => clearInterval(interval);
-  }, [] );
+  }, [getCurrentSong()]);
+                                
+  
+  
+
+function getRoomDetails () {
+  console.log("get room details")
+    return fetch("/api/get-room" + "?code=" + roomCode)
+    .then((response) => {
+      if (!response.ok) {
+        props.leaveRoomCallback();
+        props.history.push("/");
+      }
+      return response.json();
+    })
+    .then((data) => {
+      setVotesToSkip(data.votes_to_skip);
+      setGuestCanPause(data.guest_can_pause);
+      setIsHost(data.is_host); 
+      if (isHost) {
+        authenticateSpotify();
+      }
+    });
+  };
+
+  useEffect(() => {
+    getRoomDetails(); //parse and look through the json object to get the room code
+  }, []);
+
 
                                                         
-  useEffect(() => {
-    const interval = setInterval(() => {
-      getRoomDetails();
-    }, 1000);
-    return () => clearInterval(interval);
-  }, [] );
+
+
+  /*
+  useEffect ( () => () => {
+    console.log("authenticate spotify")
+     fetch("/spotify/is-authenticated")
+       .then((response) => response.json())
+       .then((data) => {
+         setSpotifyAuthenticated(data.status)
+         
+         if (!data.status) {
+           fetch("/spotify/get-auth-url")
+             .then((response) => response.json())
+             .then((data) => {
+               window.location.replace(data.url);
+             });
+         }
+       });
+   }, [] );
+  
+*/
 
 /*
   const getRoomDetails = () => {
@@ -261,22 +293,22 @@ export default function Room(props) {
 */
 
 
-  const authenticateSpotify = () => {
-   
-    fetch("/spotify/is-authenticated")
-      .then((response) => response.json())
-      .then((data) => {
-        setSpotifyAuthenticated(data.status)
-        
-        if (!data.status) {
-          fetch("/spotify/get-auth-url")
-            .then((response) => response.json())
-            .then((data) => {
-              window.location.replace(data.url);
-            });
-        }
-      });
-  };
+  
+const authenticateSpotify = () => {
+   fetch("/spotify/is-authenticated")
+     .then((response) => response.json())
+     .then((data) => {
+       setSpotifyAuthenticated(data.status)
+       if (!data.status) {
+         fetch("/spotify/get-auth-url")
+           .then((response) => response.json())
+           .then((data) => {
+             window.location.replace(data.url);
+           });
+       }
+     });
+ };
+ 
 
 
   const leaveButtonPressed = () =>{
@@ -292,7 +324,6 @@ export default function Room(props) {
   };
 
   const updateShowSettings = (value) => {
-    
    setShowSettings(value)
   };
 

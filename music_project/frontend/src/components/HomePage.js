@@ -103,13 +103,13 @@ export default function HomePage(props) {
 const [roomCode, setRoomCode] = useState(null);
 
 
-useEffect = () => {
+useEffect(() => {
   fetch('/api/user-in-room') //call api/user-in-room, this will return to us whether or not we are in a room, if we are in a room we are going to get that room code coming in through the  field called code
   .then((response) => response.json()). //return response.json from our response, that will go to .then which is data, which is a json object
   then((data) => {
-      setRoomCode(data.code)   
-  }); //parse and look through the json object to get the room code
-}
+      setRoomCode(data.code);  
+  }, []); //parse and look through the json object to get the room code
+});
 
 function renderHomePage() {
   return (
@@ -138,7 +138,7 @@ function renderHomePage() {
 
 
 const clearRoomCode = () => { //set the state so that our room code is null
-    setRoomCode(null) 
+    setRoomCode(null);
 };
 
 
